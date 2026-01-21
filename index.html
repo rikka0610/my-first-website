@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>我的第一个网页</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding-top: 100px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        .highlight {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- 下一步：在下一行替换你的名字 -->
+    <h1>你好，<span class="highlight">[rikka]</span>！</h1>
+    <p>这是我的数字世界的第一块基石。</p>
+    <p>创建于：<script>document.write(new Date().toLocaleDateString())</script></p>
+
+    <script>
+        // 这是一个简单的JavaScript交互
+        function sayHello() {
+            let name = document.querySelector('.highlight').innerText;
+            alert('欢呼吧，' + name + '！你已经成功运行了第一段程序！');
+        }
+    </script>
+    <br>
+    <button onclick="sayHello()" style="padding: 10px 20px; font-size: 1em; cursor: pointer;">
+        点击这里，见证奇迹
+    </button>
+</body>
+</html>
