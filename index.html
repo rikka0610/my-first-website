@@ -2,44 +2,42 @@
 <html>
 <head>
     <title>我的第一个网页</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            padding-top: 100px;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            color: #333;
-            font-size: 3em;
-            margin-bottom: 20px;
-        }
-        p {
-            color: #666;
-            font-size: 1.2em;
-        }
+        /* 你可以保留自定义的.highlight样式，但Tailwind已能处理大部分 */
         .highlight {
             color: #ff6b6b;
             font-weight: bold;
         }
     </style>
 </head>
-<body>
-    <!-- 下一步：在下一行替换你的名字 -->
-    <h1>你好，<span class="highlight">[rikka]</span>！</h1>
-    <p>这是我的数字世界的第一块基石。</p>
-    <p>创建于：<script>document.write(new Date().toLocaleDateString())</script></p>
+<!-- 注意：整个页面只有这一个body标签，并使用Tailwind工具类 -->
+<body class="bg-gray-50 text-center p-8">
+    <!-- 你的主要内容 -->
+    <h1 class="text-4xl font-bold text-blue-600 mt-10">
+        你好，<span class="highlight">rikka0610</span>！
+    </h1>
+    <p class="text-lg text-gray-700 mt-4">
+        这是我的数字世界的第一块基石。
+    </p>
+    <p class="text-gray-500 mt-2">
+        创建于：<script>document.write(new Date().toLocaleDateString())</script>
+    </p>
 
+    <!-- 你的按钮，使用Tailwind类替换内联style -->
+    <button
+        onclick="sayHello()"
+        class="mt-8 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl cursor-pointer transition duration-200">
+        点击这里，见证奇迹
+    </button>
+
+    <!-- JavaScript脚本放在body末尾 -->
     <script>
-        // 这是一个简单的JavaScript交互
         function sayHello() {
             let name = document.querySelector('.highlight').innerText;
             alert('欢呼吧，' + name + '！你已经成功运行了第一段程序！');
         }
     </script>
-    <br>
-    <button onclick="sayHello()" style="padding: 10px 20px; font-size: 1em; cursor: pointer;">
-        点击这里，见证奇迹
-    </button>
 </body>
 </html>
