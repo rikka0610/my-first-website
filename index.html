@@ -31,13 +31,62 @@
         class="mt-8 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl cursor-pointer transition duration-200">
         点击这里，见证奇迹
     </button>
-
+    <!-- 留言板功能 -->
+<div class="mt-12 p-6 bg-white rounded-xl shadow-md max-w-xl mx-auto">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4">留言板</h3>
+    <div class="flex">
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="留下你的想法..."
+            class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+        <button
+            onclick="saveMessage()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-r-lg px-6"
+        >
+            保存
+        </button>
+    </div>
+    <ul id="messageList" class="mt-6 space-y-3"></ul>
+</div>
     <!-- JavaScript脚本放在body末尾 -->
     <script>
         function sayHello() {
             let name = document.querySelector('.highlight').innerText;
             alert('欢呼吧，' + name + '！你已经成功运行了第一段程序！');
         }
+        // 留言板功能函数
+function saveMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    if (message) {
+        // 1. 获取现有留言
+        let messages = JSON.parse(localStorage.getItem('guestMessages')) || [];
+        // 2. 添加新留言
+        messages.push(message);
+        // 3. 保存到浏览器本地
+        localStorage.setItem('guestMessages', JSON.stringify(messages));
+        // 4. 更新显示
+        displayMessages();
+        // 5. 清空输入框
+        input.value = '';
+    }
+}
+
+function displayMessages() {
+    const list = document.getElementById('messageList');
+    const messages = JSON.parse(localStorage.getItem('guestMessages')) || [];
+    // 将每条留言转为列表项，最新的在最上面
+    list.innerHTML = messages.map(msg => `
+        <li class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            ${msg}
+        </li>
+    `).reverse().join('');
+}
+
+// 页面加载时显示已有留言
+document.addEventListener('DOMContentLoaded', displayMessages);
     </script>
 </body>
 </html>
