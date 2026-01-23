@@ -5,147 +5,202 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>留言管理后台</title>
     
-    <!-- 先加载Supabase库 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- 使用官方CDN加载Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
-    <!-- 再加载Tailwind -->
+    <!-- 加载Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
-        // 等待库加载完成
-        setTimeout(function() {
-            console.log('检查Supabase库是否加载:', typeof window.supabase);
+        // 设置一个超时检查，确保库加载完成
+        setTimeout(initializeApp, 500);
+        
+        function initializeApp() {
+            console.log('初始化应用...');
+            console.log('window.supabase 状态:', typeof window.supabase);
             
+            // 检查Supabase库是否加载成功
             if (typeof window.supabase === 'undefined') {
-                document.body.innerHTML = `
-                    <div class="p-8 bg-red-50 min-h-screen">
-                        <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
-                            <h1 class="text-2xl font-bold text-red-600 mb-4">❌ 错误</h1>
-                            <p>Supabase库加载失败，请：</p>
-                            <ol class="list-decimal pl-5 mt-2 space-y-1">
-                                <li>检查网络连接</li>
-                                <li>刷新页面重试</li>
-                                <li>或使用备用方案：</li>
-                            </ol>
-                            <button onclick="location.reload()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-                                刷新页面
-                            </button>
-                        </div>
-                    </div>
-                `;
+                console.error('❌ Supabase库加载失败！尝试备用方案...');
+                
+                // 尝试用另一个CDN重新加载
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+                script.onload = function() {
+                    console.log('✅ 备用CDN加载成功，重新初始化...');
+                    initializeSupabase();
+                };
+                script.onerror = function() {
+                    showError('Supabase库无法加载，请检查网络连接。');
+                };
+                document.head.appendChild(script);
                 return;
             }
             
-            // 初始化
-            const supabase = window.supabase.createClient(
-                'https://oqdsonfinipixdexgeyw.supabase.co',
-                'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P'
-            );
+            // 如果库已加载，直接初始化
+            initializeSupabase();
+        }
+        
+        function initializeSupabase() {
+            // 再次检查
+            if (typeof window.supabase === 'undefined') {
+                showError('Supabase库仍然未加载，请刷新页面重试。');
+                return;
+            }
             
-            // 保存到全局变量
-            window.supabaseClient = supabase;
-            console.log('Supabase初始化完成');
-        }, 1000);
+            try {
+                // 你的配置信息
+                const SUPABASE_URL = 'https://oqdsonfinipixdexgeyw.supabase.co';
+                const SUPABASE_KEY = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P';
+                
+                // 创建客户端
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase客户端创建成功');
+                
+                // 更新页面状态
+                document.getElementById('initStatus').textContent = '✅ 系统就绪';
+                document.getElementById('initStatus').className = 'text-green-600 font-medium';
+                document.getElementById('loginSection').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('初始化失败:', error);
+                showError('配置错误: ' + error.message);
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('initStatus').textContent = '❌ ' + message;
+            document.getElementById('initStatus').className = 'text-red-600 font-medium';
+            document.getElementById('errorDetails').textContent = message;
+            document.getElementById('errorDetails').classList.remove('hidden');
+        }
     </script>
 </head>
 
-<body class="bg-gray-50 min-h-screen p-4">
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
+        <!-- 标题 -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">🔧 留言管理后台</h1>
-            <p class="text-gray-600">状态：<span id="status">初始化中...</span></p>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">📋 留言管理后台</h1>
+            <div class="flex items-center justify-between">
+                <p class="text-gray-600">技术栈：Supabase + JavaScript + Tailwind CSS</p>
+                <span id="initStatus" class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm">
+                    正在初始化...
+                </span>
+            </div>
         </div>
         
-        <div id="app" class="bg-white rounded-xl shadow-lg p-6">
-            <div class="text-center py-12">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500 mb-4"></div>
-                <p class="text-gray-600">正在加载管理系统...</p>
-                <p class="text-sm text-gray-400 mt-2" id="debugInfo"></p>
+        <!-- 错误提示 -->
+        <div id="errorDetails" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <h3 class="font-bold text-red-700 mb-2">⚠️ 初始化错误</h3>
+            <p id="errorText" class="text-red-600"></p>
+            <button onclick="location.reload()" class="mt-3 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
+                刷新页面重试
+            </button>
+        </div>
+        
+        <!-- 登录区域 -->
+        <div id="loginSection" class="hidden bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">管理员登录</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2 font-medium">管理密码</label>
+                    <input type="password" id="passwordInput" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                           placeholder="请输入你在Supabase的admin_config表中设置的密码">
+                    <p class="text-sm text-gray-500 mt-1">
+                        密码存储在 Supabase 的 <code class="bg-gray-100 px-1 rounded">admin_config</code> 表中
+                    </p>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="login()" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow hover:shadow-md">
+                        登录管理
+                    </button>
+                    <button onclick="checkDatabase()" 
+                            class="px-4 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg transition">
+                        检查数据库
+                    </button>
+                </div>
+                
+                <div id="loginMessage" class="mt-4"></div>
+            </div>
+            
+            <!-- 管理区域（登录后显示） -->
+            <div id="managementSection" class="hidden mt-8 pt-6 border-t">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">留言列表</h3>
+                    <span id="messageCount" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">0条</span>
+                </div>
+                
+                <div id="messageList" class="space-y-4">
+                    <!-- 留言会动态加载到这里 -->
+                </div>
             </div>
         </div>
     </div>
     
+    <!-- 主应用逻辑 -->
     <script>
-        // 主应用逻辑
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusEl = document.getElementById('status');
-            const debugEl = document.getElementById('debugInfo');
-            const appEl = document.getElementById('app');
-            
-            // 每隔1秒检查Supabase状态
-            const checkInterval = setInterval(function() {
-                if (window.supabaseClient) {
-                    clearInterval(checkInterval);
-                    statusEl.textContent = '已连接';
-                    statusEl.className = 'text-green-600 font-medium';
-                    
-                    debugEl.textContent = '连接成功，加载登录界面...';
-                    
-                    // 显示登录界面
-                    setTimeout(function() {
-                        appEl.innerHTML = `
-                            <h2 class="text-2xl font-bold text-gray-800 mb-6">管理员登录</h2>
-                            
-                            <div class="mb-6">
-                                <label class="block text-gray-700 mb-2">管理密码</label>
-                                <input type="password" id="password" 
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       placeholder="输入你在Supabase中设置的密码">
-                            </div>
-                            
-                            <button onclick="adminLogin()" 
-                                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                                登录管理
-                            </button>
-                            
-                            <div class="mt-4 text-center">
-                                <button onclick="checkConnection()" class="text-sm text-blue-500 hover:text-blue-700">
-                                    测试数据库连接
-                                </button>
-                            </div>
-                            
-                            <div id="message" class="mt-4 p-3 rounded text-sm"></div>
-                        `;
-                    }, 500);
-                }
-            }, 1000);
-        });
-        
-        // 测试连接
-        async function checkConnection() {
-            const messageEl = document.getElementById('message');
-            messageEl.innerHTML = '<div class="text-blue-500">正在测试连接...</div>';
+        // 检查数据库连接
+        async function checkDatabase() {
+            const messageEl = document.getElementById('loginMessage');
+            messageEl.innerHTML = '<div class="text-blue-500">正在检查数据库连接...</div>';
             
             try {
-                const { data, error } = await window.supabaseClient
+                // 测试messages表
+                const { data: messages, error: msgError } = await window.supabaseClient
                     .from('messages')
-                    .select('count')
+                    .select('id')
                     .limit(1);
                 
-                if (error) {
-                    messageEl.innerHTML = `<div class="text-red-500">连接失败: ${error.message}</div>`;
+                // 测试admin_config表
+                const { data: admin, error: adminError } = await window.supabaseClient
+                    .from('admin_config')
+                    .select('admin_password')
+                    .limit(1);
+                
+                let html = '<div class="space-y-2">';
+                
+                if (msgError) {
+                    html += `<div class="text-red-500">❌ messages表: ${msgError.message}</div>`;
                 } else {
-                    messageEl.innerHTML = `<div class="text-green-500">✅ 数据库连接成功！</div>`;
+                    html += `<div class="text-green-500">✅ messages表连接正常</div>`;
                 }
-            } catch (err) {
-                messageEl.innerHTML = `<div class="text-red-500">异常: ${err.message}</div>`;
+                
+                if (adminError) {
+                    html += `<div class="text-red-500">❌ admin_config表: ${adminError.message}</div>`;
+                    html += `<div class="text-red-500 mt-2">请先在Supabase中创建admin_config表并设置密码！</div>`;
+                } else if (!admin || admin.length === 0) {
+                    html += `<div class="text-yellow-500">⚠️ admin_config表存在但为空，请插入密码数据</div>`;
+                } else {
+                    html += `<div class="text-green-500">✅ admin_config表连接正常</div>`;
+                }
+                
+                html += '</div>';
+                messageEl.innerHTML = html;
+                
+            } catch (error) {
+                messageEl.innerHTML = `<div class="text-red-500">检查失败: ${error.message}</div>`;
             }
         }
         
         // 登录函数
-        async function adminLogin() {
-            const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('message');
+        async function login() {
+            const password = document.getElementById('passwordInput').value.trim();
+            const messageEl = document.getElementById('loginMessage');
             
             if (!password) {
                 messageEl.innerHTML = '<div class="text-red-500">请输入密码</div>';
                 return;
             }
             
-            messageEl.innerHTML = '<div class="text-blue-500">验证中...</div>';
+            messageEl.innerHTML = '<div class="text-blue-500">正在验证密码...</div>';
             
             try {
-                // 读取admin_config表
+                // 从admin_config表读取密码
                 const { data, error } = await window.supabaseClient
                     .from('admin_config')
                     .select('admin_password')
@@ -157,22 +212,118 @@
                 }
                 
                 if (!data || data.length === 0) {
-                    messageEl.innerHTML = `<div class="text-red-500">请先在Supabase中创建admin_config表</div>`;
+                    messageEl.innerHTML = `
+                        <div class="text-red-500">
+                            ❌ 未找到密码数据<br>
+                            请在Supabase中：<br>
+                            1. 创建admin_config表<br>
+                            2. 插入一行数据，如：INSERT INTO admin_config (admin_password) VALUES ('你的密码');
+                        </div>
+                    `;
                     return;
                 }
                 
-                if (data[0].admin_password === password) {
-                    messageEl.innerHTML = '<div class="text-green-500">✅ 登录成功！</div>';
-                    // 这里可以跳转到管理页面
-                    setTimeout(function() {
-                        alert('登录成功！接下来加载留言管理功能...');
-                        // 你可以在这里加载留言管理界面
-                    }, 1000);
+                const storedPassword = data[0].admin_password;
+                
+                if (password === storedPassword) {
+                    // 登录成功
+                    messageEl.innerHTML = '<div class="text-green-500">✅ 登录成功！加载留言中...</div>';
+                    
+                    // 切换到管理界面
+                    document.getElementById('loginSection').querySelector('h2').classList.add('hidden');
+                    document.getElementById('passwordInput').classList.add('hidden');
+                    document.querySelector('button[onclick="login()"]').classList.add('hidden');
+                    document.querySelector('button[onclick="checkDatabase()"]').classList.add('hidden');
+                    
+                    document.getElementById('managementSection').classList.remove('hidden');
+                    
+                    // 加载留言
+                    loadMessages();
+                    
                 } else {
-                    messageEl.innerHTML = '<div class="text-red-500">密码错误</div>';
+                    messageEl.innerHTML = '<div class="text-red-500">❌ 密码错误</div>';
                 }
-            } catch (err) {
-                messageEl.innerHTML = `<div class="text-red-500">系统错误: ${err.message}</div>`;
+                
+            } catch (error) {
+                messageEl.innerHTML = `<div class="text-red-500">系统错误: ${error.message}</div>`;
+            }
+        }
+        
+        // 加载留言
+        async function loadMessages() {
+            const messageListEl = document.getElementById('messageList');
+            messageListEl.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                    <p class="text-gray-600">正在加载留言...</p>
+                </div>
+            `;
+            
+            try {
+                const { data: messages, error } = await window.supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    messageListEl.innerHTML = `<div class="text-red-500 p-4 bg-red-50 rounded">加载失败: ${error.message}</div>`;
+                    return;
+                }
+                
+                // 更新计数
+                document.getElementById('messageCount').textContent = `${messages.length}条`;
+                
+                if (messages.length === 0) {
+                    messageListEl.innerHTML = '<div class="text-center py-12 text-gray-500">暂无留言</div>';
+                    return;
+                }
+                
+                // 显示留言列表
+                messageListEl.innerHTML = '';
+                messages.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = 'border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="font-bold text-gray-800">${msg.name || '匿名用户'}</span>
+                                    <span class="ml-2 text-xs text-gray-500">${new Date(msg.created_at).toLocaleString('zh-CN')}</span>
+                                </div>
+                                <p class="text-gray-700 whitespace-pre-wrap">${msg.message}</p>
+                            </div>
+                            <button onclick="deleteMessage(${msg.id})" 
+                                    class="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm transition">
+                                删除
+                            </button>
+                        </div>
+                    `;
+                    messageListEl.appendChild(div);
+                });
+                
+            } catch (error) {
+                messageListEl.innerHTML = `<div class="text-red-500">加载异常: ${error.message}</div>`;
+            }
+        }
+        
+        // 删除留言
+        async function deleteMessage(id) {
+            if (!confirm('确定要删除这条留言吗？')) return;
+            
+            try {
+                const { error } = await window.supabaseClient
+                    .from('messages')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) {
+                    alert('删除失败: ' + error.message);
+                } else {
+                    alert('✅ 删除成功！');
+                    loadMessages(); // 重新加载
+                }
+            } catch (error) {
+                alert('删除异常: ' + error.message);
             }
         }
     </script>
