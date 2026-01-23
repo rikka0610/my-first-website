@@ -1,92 +1,112 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>我的第一个网页</title>
-    <!-- 引入Tailwind CSS -->
+    <title>我的个人网站</title>
+    <meta charset="UTF-8">
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 你可以保留自定义的.highlight样式，但Tailwind已能处理大部分 */
-        .highlight {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
+        .highlight { color: #ff6b6b; font-weight: bold; }
     </style>
 </head>
-<!-- 注意：整个页面只有这一个body标签，并使用Tailwind工具类 -->
 <body class="bg-gray-50 text-center p-8">
-    <!-- 你的主要内容 -->
     <h1 class="text-4xl font-bold text-blue-600 mt-10">
         你好，<span class="highlight">rikka0610</span>！
     </h1>
-    <p class="text-lg text-gray-700 mt-4">
-        这是我的数字世界的第一块基石。
-    </p>
-    <p class="text-gray-500 mt-2">
-        创建于：<script>document.write(new Date().toLocaleDateString())</script>
-    </p>
+    <p class="text-lg text-gray-700 mt-4">这是我的数字世界的第一块基石。</p>
+    <p class="text-gray-500 mt-2">创建于：<script>document.write(new Date().toLocaleDateString())</script></p>
 
-    <!-- 你的按钮，使用Tailwind类替换内联style -->
-    <button
-        onclick="sayHello()"
-        class="mt-8 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl cursor-pointer transition duration-200">
+    <button onclick="sayHello()" class="mt-8 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl cursor-pointer transition duration-200">
         点击这里，见证奇迹
     </button>
-    <!-- 留言板功能 -->
-<div class="mt-12 p-6 bg-white rounded-xl shadow-md max-w-xl mx-auto">
-    <h3 class="text-2xl font-bold text-gray-800 mb-4">留言板</h3>
-    <div class="flex">
-        <input
-            type="text"
-            id="messageInput"
-            placeholder="留下你的想法..."
-            class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-        <button
-            onclick="saveMessage()"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-r-lg px-6"
-        >
-            保存
-        </button>
+
+    <!-- 留言板 -->
+    <div class="mt-12 p-6 bg-white rounded-xl shadow-md max-w-xl mx-auto">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">留言板</h3>
+        <div class="flex">
+            <input type="text" id="messageInput" placeholder="留下你的想法..." class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="saveMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-r-lg px-6">保存</button>
+        </div>
+        <ul id="messageList" class="mt-6 space-y-3"></ul>
     </div>
-    <ul id="messageList" class="mt-6 space-y-3"></ul>
-</div>
-    <!-- JavaScript脚本放在body末尾 -->
+
+    <!-- 所有JavaScript代码放在body末尾 -->
     <script>
+        // ================= 1. Supabase 配置 =================
+        // TODO: 请务必替换成你自己的 Supabase 项目信息！
+        const SUPABASE_URL = 'https://oqdsfonainpixdexgeyw.supabase.co'; // 替换为你的URL
+        const SUPABASE_ANON_KEY = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P'; // 替换为你的anon key
+
+        // ================= 2. 打招呼函数 =================
         function sayHello() {
             let name = document.querySelector('.highlight').innerText;
-            alert('欢呼吧，' + name + '！你已经成功运行了第一段程序！');
+            alert('你好，' + name + '！继续加油！');
         }
-        // 留言板功能函数
-function saveMessage() {
-    const input = document.getElementById('messageInput');
-    const message = input.value.trim();
-    if (message) {
-        // 1. 获取现有留言
-        let messages = JSON.parse(localStorage.getItem('guestMessages')) || [];
-        // 2. 添加新留言
-        messages.push(message);
-        // 3. 保存到浏览器本地
-        localStorage.setItem('guestMessages', JSON.stringify(messages));
-        // 4. 更新显示
-        displayMessages();
-        // 5. 清空输入框
-        input.value = '';
-    }
-}
 
-function displayMessages() {
-    const list = document.getElementById('messageList');
-    const messages = JSON.parse(localStorage.getItem('guestMessages')) || [];
-    // 将每条留言转为列表项，最新的在最上面
-    list.innerHTML = messages.map(msg => `
-        <li class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-            ${msg}
-        </li>
-    `).reverse().join('');
-}
+        // ================= 3. 保存留言到 Supabase =================
+        async function saveMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
 
-// 页面加载时显示已有留言
-document.addEventListener('DOMContentLoaded', displayMessages);
+            const listElement = document.getElementById('messageList');
+            listElement.innerHTML = '<li class="p-2 text-gray-500">发送中...</li>';
+
+            try {
+                const response = await fetch(SUPABASE_URL + '/rest/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ content: message })
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    displayMessages();
+                } else {
+                    listElement.innerHTML = '<li class="p-2 text-red-500">发送失败，请检查配置。</li>';
+                }
+            } catch (error) {
+                console.error('保存错误:', error);
+                listElement.innerHTML = '<li class="p-2 text-red-500">网络错误，请检查连接。</li>';
+            }
+        }
+
+        // ================= 4. 从 Supabase 加载留言 =================
+        async function displayMessages() {
+            const list = document.getElementById('messageList');
+            list.innerHTML = '<li class="p-2 text-gray-500">加载中...</li>';
+
+            try {
+                const response = await fetch(SUPABASE_URL + '/rest/v1/messages?select=content&order=created_at.desc', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    }
+                });
+
+                if (!response.ok) throw new Error('API请求失败');
+                const messages = await response.json();
+
+                if (messages.length > 0) {
+                    list.innerHTML = messages.map(msg => 
+                        `<li class="bg-gray-50 p-3 rounded-lg border border-gray-200">${msg.content}</li>`
+                    ).join('');
+                } else {
+                    list.innerHTML = '<li class="p-2 text-gray-500">还没有留言，快来第一个发言吧！</li>';
+                }
+            } catch (error) {
+                console.error('加载错误:', error);
+                list.innerHTML = '<li class="p-2 text-red-500">加载留言失败，请检查Supabase配置。</li>';
+            }
+        }
+
+        // ================= 5. 页面加载时自动显示留言 =================
+        document.addEventListener('DOMContentLoaded', displayMessages);
     </script>
 </body>
 </html>
