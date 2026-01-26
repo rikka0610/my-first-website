@@ -50,8 +50,9 @@
             
             try {
                 // 你的配置信息
-                const SUPABASE_URL = 'https://oqdsonfinipixdexgeyw.supabase.co';
-                const SUPABASE_KEY = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P';
+                const supabaseUrl = 'https://oqdsfonainpixdexgeyw.supabase.co';
+                const supabaseKey = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P';
+                const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
                 
                 // 创建客户端
                 window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);

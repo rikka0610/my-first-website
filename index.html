@@ -34,8 +34,9 @@
     <script>
         // ================= 1. Supabase 配置 =================
         // TODO: 请务必替换成你自己的 Supabase 项目信息！
-        const SUPABASE_URL = 'https://oqdsfonainpixdexgeyw.supabase.co'; // 替换为你的URL
-        const SUPABASE_ANON_KEY = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P'; // 替换为你的anon key
+        const supabaseUrl = 'https://oqdsfonainpixdexgeyw.supabase.co';
+        const supabaseKey = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         // ================= 2. 打招呼函数 =================
         function sayHello() {
