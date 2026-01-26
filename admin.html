@@ -49,24 +49,26 @@
             }
             
             try {
-                // 你的配置信息
-                const supabaseUrl = 'https://oqdsfonainpixdexgeyw.supabase.co';
-                const supabaseKey = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P';
-                const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-                
-                // 创建客户端
-                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase客户端创建成功');
-                
-                // 更新页面状态
-                document.getElementById('initStatus').textContent = '✅ 系统就绪';
-                document.getElementById('initStatus').className = 'text-green-600 font-medium';
-                document.getElementById('loginSection').classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('初始化失败:', error);
-                showError('配置错误: ' + error.message);
-            }
+    // 正确的配置信息
+    const SUPABASE_URL = 'https://oqdsfonainpixdexgeyw.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_848DLPRMEZZqZgJWDKj1CA_cWDBp-9P';
+    
+    // 创建客户端（注意：变量名要一致！）
+    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('✅ Supabase客户端创建成功');
+
+    // 更新页面状态
+    document.getElementById('initStatus').textContent = '✅ 系统就绪';
+    document.getElementById('initStatus').className = 'text-green-600 font-medium';
+    
+    // 显示登录界面
+    document.getElementById('loginSection').classList.remove('hidden');
+    
+} catch (error) {
+    console.error('初始化失败:', error);
+    document.getElementById('initStatus').textContent = '❌ 配置错误';
+    document.getElementById('initStatus').className = 'text-red-600 font-medium';
+}
         }
         
         function showError(message) {
